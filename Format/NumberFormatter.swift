@@ -44,10 +44,10 @@ open class NumberFormat {
     let distanceFormatter = MKDistanceFormatter()
     
     let massFormatter = MassFormatter()
-
-    open func format(_ number: NSNumber, formatter: NumberFormatter) -> String{
+    
+    open func format(_ number: NSNumber, formatter: NumberFormatter, decimals: Int? = nil) -> String{
         if let customLocaleFormatter = formatter as? NumberFormatterCustomLocaleAvailable {
-            return format(number, formatter: customLocaleFormatter, locale: Locale.current)
+            return format(number, formatter: customLocaleFormatter, locale: Locale.current, decimals: decimals)
         }
         else {
             return defaultLocaleOnlyFormat(number, formatter: formatter)
@@ -63,14 +63,14 @@ open class NumberFormat {
      
      - returns: formatted string.
      */
-    open func format(_ number: NSNumber, formatter: NumberFormatterCustomLocaleAvailable, locale: Locale) -> String{
+    open func format(_ number: NSNumber, formatter: NumberFormatterCustomLocaleAvailable, locale: Locale, decimals: Int? = nil) -> String{
         if let style = formatter.style , nsFormatter.numberStyle != style {
             nsFormatter = Foundation.NumberFormatter()
             nsFormatter.numberStyle = style
         }
         nsFormatter.locale = locale
         distanceFormatter.locale = locale
-
+        
         var formattedString: String?
         if (formatter.type == .decimal) {
             if let modifierAsInt = Int(formatter.modifier) {
@@ -80,6 +80,13 @@ open class NumberFormat {
             formattedString = nsFormatter.string(from: number)
         }
         if (formatter.type == .currency) {
+            if let decimals = decimals {
+                nsFormatter.maximumFractionDigits = decimals
+                nsFormatter.minimumFractionDigits = decimals
+            } else {
+                nsFormatter.maximumFractionDigits = 2
+                nsFormatter.minimumFractionDigits = 2
+            }
             nsFormatter.currencyCode = formatter.modifier
             nsFormatter.currencySymbol = (nsFormatter.currencyCode == Currency.BTC.modifier) ? "Ƀ" : nil
             formattedString = nsFormatter.string(from: number)
@@ -90,8 +97,9 @@ open class NumberFormat {
             } else if formatter.modifier == NumberFormatterSpellOutKey {
                 formattedString = nsFormatter.string(from: number)
             } else if formatter.modifier == NumberFormatterDistanceKey {
-                let distance = number as CLLocationDistance
-                formattedString = distanceFormatter.string(fromDistance: distance)
+                if let distance = number as? CLLocationDistance {
+                    formattedString = distanceFormatter.string(fromDistance: distance)
+                }
             }
         }
         guard let finalString = formattedString else {
@@ -107,10 +115,10 @@ open class NumberFormat {
             formattedString = massFormatter.string(fromKilograms: number.doubleValue)
         }
         guard let finalString = formattedString else {
-        return ""
+            return ""
         }
         return finalString
     }
-
+    
 }
 

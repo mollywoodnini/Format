@@ -27,10 +27,10 @@ public protocol NumberFormatProvider {
      
      - parameter formatter: A `NumberFormat` which will be used to transform the number.
      
-     - returns: A string which corresponds to the transformed value of the number according to the 
+     - returns: A string which corresponds to the transformed value of the number according to the
      `NumberFormat` provided.
      */
-    func format(_ formatter: NumberFormatter) -> String
+    func format(_ formatter: NumberFormatter, decimals: Int?) -> String
     
     /**
      Returns the transformation of the current number as a `String` based on the provided locale.
@@ -41,7 +41,7 @@ public protocol NumberFormatProvider {
      - returns: A string which corresponds to the transformed value of the number according to the
      `NumberFormat` provided.
      */
-    func format(_ formatter: NumberFormatterCustomLocaleAvailable, locale: Locale) -> String
+    func format(_ formatter: NumberFormatterCustomLocaleAvailable, locale: Locale, decimals: Int?) -> String
 }
 
 /**
@@ -49,13 +49,13 @@ public protocol NumberFormatProvider {
  */
 extension NumberFormatProvider {
     
-    public func format(_ formatter: NumberFormatter) -> String {
-        let formattedNumber = NumberFormat.sharedInstance.format(formatNumber(), formatter: formatter)
+    public func format(_ formatter: NumberFormatter, decimals: Int? = nil) -> String {
+        let formattedNumber = NumberFormat.sharedInstance.format(formatNumber(), formatter: formatter, decimals: decimals)
         return formattedNumber
     }
-
-    public func format(_ formatter: NumberFormatterCustomLocaleAvailable, locale: Locale) -> String {
-        let formattedNumber = NumberFormat.sharedInstance.format(formatNumber(), formatter: formatter, locale: locale)
+    
+    public func format(_ formatter: NumberFormatterCustomLocaleAvailable, locale: Locale, decimals: Int? = nil) -> String {
+        let formattedNumber = NumberFormat.sharedInstance.format(formatNumber(), formatter: formatter, locale: locale, decimals: decimals)
         return formattedNumber
     }
 }
@@ -180,3 +180,4 @@ extension UInt64: NumberFormatProvider {
         return NSNumber(value: self as UInt64)
     }
 }
+
